@@ -20,7 +20,7 @@ public class Pool {
     private String startDate;
 
     private String endDate;
-    
+
     public String getStartDate() {
         return startDate;
     }
