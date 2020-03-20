@@ -38,4 +38,9 @@ public class DateParser {
         long t=(long)days*24 * 60 * 60 * 1000;
         return new Date(date.getTime()-t);
     }
+
+    public static Date post(Date date, int days){
+        long t=(long)days*24 * 60 * 60 * 1000;
+        return new Date(date.getTime()+t);
+    }
 }

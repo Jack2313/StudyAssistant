@@ -1,7 +1,7 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/studentassistant?useSSL=false&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/studentassistant?useSSL=false&characterEncoding=utf-8&serverTimezone=UTC
     username: root
     password: LjF1!2@3#
   jpa:

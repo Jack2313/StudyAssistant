@@ -13,5 +13,5 @@ public class TicketController {
     @Autowired
     private TicketRepository ticketRepository;
 
-    
+
 }
