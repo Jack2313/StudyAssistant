@@ -4,4 +4,5 @@ import com.komnenos.studentassistant.Entity.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
+    public Ticket findByTicketId(int id);
 }

@@ -17,6 +17,16 @@ public class Ticket {
 
     private boolean isUsed;
 
+    public boolean isAble() {
+        return isAble;
+    }
+
+    public void setAble(boolean able) {
+        isAble = able;
+    }
+
+    private boolean isAble;
+
     public int getValue() {
         return value;
     }
