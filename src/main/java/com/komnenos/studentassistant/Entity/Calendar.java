@@ -11,17 +11,57 @@ public class Calendar {
     @GeneratedValue
     private int calendarId;
 
-    private int year;
+    public boolean isAble() {
+        return isAble;
+    }
 
-    private int month;
+    public void setAble(boolean able) {
+        isAble = able;
+    }
 
-    private int day;
+    private boolean isAble;
 
-    private int startHour;
+    public String getStartTime() {
+        return startTime;
+    }
 
-    private int endHour;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    private String startTime;
+
+    private String endTime;
+
+    public int getHours() {
+        return hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
+    }
+
+    private int hours;
 
     private String description;
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    private int userId;
 
     public int getCalendarId() {
         return calendarId;
@@ -31,45 +71,6 @@ public class Calendar {
         this.calendarId = calendarId;
     }
 
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
-    public int getDay() {
-        return day;
-    }
-
-    public void setDay(int day) {
-        this.day = day;
-    }
-
-    public int getStartHour() {
-        return startHour;
-    }
-
-    public void setStartHour(int startHour) {
-        this.startHour = startHour;
-    }
-
-    public int getEndHour() {
-        return endHour;
-    }
-
-    public void setEndHour(int endHour) {
-        this.endHour = endHour;
-    }
 
     public String getDescription() {
         return description;

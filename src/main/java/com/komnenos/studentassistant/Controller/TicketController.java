@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.komnenos.studentassistant.StaticClass.Global;
 
+import java.util.List;
+
 @Controller
 @CrossOrigin
 @RequestMapping("/ticket/*")
@@ -14,29 +16,27 @@ public class TicketController {
     @Autowired
     private TicketRepository ticketRepository;
 
-    @GetMapping(value = "/create")
+    @GetMapping(value = "/getUnusedTicketNum")
     @ResponseBody
-    public Ticket createTicket(@RequestParam("userId") int userId){
-        Ticket t = new Ticket();
-        t.setTicketCode(Global.getRandomString(16));
-        t.setUsed(false);
-        t.setAble(false);
-        t.setValue(0);
-        t.setUserId(userId);
-        ticketRepository.save(t);
-        ticketRepository.flush();
-        return t;
+    private int getUnusedTicketNum(@RequestParam("userId") int userId){
+        return ticketRepository.getAllUserTicketWithB(userId, false).size();
     }
 
-    @GetMapping(value = "/validate")
+    @GetMapping(value = "/getUsedTicketNum")
     @ResponseBody
-    public int validateTicket(@RequestParam("ticketId") int ticketId){
-        int result=0;
-        Ticket t = ticketRepository.findByTicketId(ticketId);
-        if(t!=null){
-            t.setAble(true);
-            result=1;
+    private int getUsedTicketNum(@RequestParam("userId") int userId){
+        return ticketRepository.getAllUserTicketWithB(userId, true).size();
+    }
+
+
+    @GetMapping(value = "/getUserMoney")
+    @ResponseBody
+    private int getUserGifts(@RequestParam("userId") int userId){
+        int money = 0;
+        List<Ticket> tickets=ticketRepository.getAllUserTicketWithB(userId, true);
+        for(int i=0;i<tickets.size();i++){
+            money=money+tickets.get(i).getValue();
         }
-        return result;
+        return money;
     }
 }

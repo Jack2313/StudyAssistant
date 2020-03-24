@@ -15,4 +15,10 @@ public class Global {
         }
         return sb.toString();
     }
+
+
+    public static double NormalDistribution(float u,float v) {
+        java.util.Random random = new java.util.Random();
+        return Math.sqrt(v) * random.nextGaussian() + u;
+    }
 }
