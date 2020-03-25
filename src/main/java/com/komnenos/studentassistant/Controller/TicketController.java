@@ -31,12 +31,14 @@ public class TicketController {
 
     @GetMapping(value = "/getUserMoney")
     @ResponseBody
-    private int getUserGifts(@RequestParam("userId") int userId){
-        int money = 0;
+    private String getUserMoney(@RequestParam("userId") int userId){
+        double money = 0.0;
         List<Ticket> tickets=ticketRepository.getAllUserTicketWithB(userId, true);
         for(int i=0;i<tickets.size();i++){
-            money=money+tickets.get(i).getValue();
+            if(tickets.get(i).isGift()==false) {
+                money = money + tickets.get(i).getValue();
+            }
         }
-        return money;
+        return Global.df.format(money);
     }
 }

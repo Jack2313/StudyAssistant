@@ -1,9 +1,12 @@
 package com.komnenos.studentassistant.StaticClass;
 
+import java.text.DecimalFormat;
 import java.util.Random;
 
 public class Global {
     public static String message;
+
+    public static DecimalFormat df = new DecimalFormat("#.00");
 
     public static String getRandomString(int length){
         String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -17,8 +20,8 @@ public class Global {
     }
 
 
-    public static double NormalDistribution(float u,float v) {
+    public static double NormalDistribution(double u,double v) {
         java.util.Random random = new java.util.Random();
-        return Math.sqrt(v) * random.nextGaussian() + u;
+        return v * random.nextGaussian() + u;
     }
 }

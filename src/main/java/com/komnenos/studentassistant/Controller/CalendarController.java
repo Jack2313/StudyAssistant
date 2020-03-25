@@ -30,7 +30,8 @@ public class CalendarController {
             t.setTicketCode(Global.getRandomString(16));
             t.setUsed(false);
             t.setAble(true);
-            t.setValue(0);
+            t.setGift(false);
+            t.setValue(0.0);
             t.setUserId(userId);
             ticketRepository.save(t);
             ticketRepository.flush();
@@ -64,15 +65,15 @@ public class CalendarController {
 
     @GetMapping(value = "/getBonusCount")
     @ResponseBody
-    public int getBonusCount(@RequestParam("userId") int userId){
-        int result=0;
+    public String getBonusCount(@RequestParam("userId") int userId){
+        double result=0;
         List<Ticket> tickets= ticketRepository.getAllTicket(userId);
         for(int i=0;i<tickets.size();i++){
             if(tickets.get(i).isUsed()) {
                 result = result + tickets.get(i).getValue();
             }
         }
-        return result;
+        return Global.df.format(result);
     }
 
     @PostMapping(value ="/create")

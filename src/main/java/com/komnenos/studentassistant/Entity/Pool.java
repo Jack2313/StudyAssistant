@@ -1,5 +1,6 @@
 package com.komnenos.studentassistant.Entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,7 +14,8 @@ public class Pool {
 
     private String name;
 
-    private int value;
+    @Column(name = "value", precision = 10, scale = 2)
+    private double value;
 
     private int round;
 
@@ -45,11 +47,11 @@ public class Pool {
         this.name = name;
     }
 
-    public int getValue() {
+    public double getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(double value) {
         this.value = value;
     }
 

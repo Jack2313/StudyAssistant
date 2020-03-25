@@ -7,6 +7,7 @@ import com.komnenos.studentassistant.Entity.Ticket;
 import com.komnenos.studentassistant.Repository.GiftRecordRepository;
 import com.komnenos.studentassistant.Repository.GiftRepository;
 import com.komnenos.studentassistant.Repository.PoolRepository;
+import com.komnenos.studentassistant.Repository.TicketRepository;
 import com.komnenos.studentassistant.StaticClass.DateParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,9 @@ public class PoolController {
 
     @Autowired
     private GiftRecordRepository giftRecordRepository;
+
+    @Autowired
+    private TicketRepository ticketRepository;
 
     @GetMapping(value = "/setGifts")
     @ResponseBody
@@ -62,21 +66,95 @@ public class PoolController {
 
     @GetMapping(value = "/draw")
     @ResponseBody
-    private int draw(@RequestParam("userId") int userId){
-        int result=0;
-        Pool p = poolRepository.findTopByValueIsGreaterThan(0);
-        int r=p.getRound();
-        int v=p.getValue();
+    private String draw(@RequestParam("userId") int userId){
+        System.out.println("in draw");
+        List<Ticket> userTickets=ticketRepository.getAllUserTicketWithB(userId, false);
+        if(userTickets.size()==0){
+            return "no tickets!";
+        }
+        Ticket t = userTickets.get(0);
 
-        return result;
+        Pool p = poolRepository.findAll().get(0);
+        int r=p.getRound();
+        double v=p.getValue();
+        double e=v/r;
+        double n=e/6;
+        double result=Global.NormalDistribution(e,n);
+        if (result<=0){
+            result=0.01;
+        }
+
+        if(result>v){
+            result=v;
+        }
+        p.setRound(r-1);
+        p.setValue(v-result);
+        poolRepository.save(p);
+        poolRepository.flush();
+
+        t.setGift(false);
+        t.setUsed(true);
+        t.setValue(result);
+        ticketRepository.save(t);
+        ticketRepository.flush();;
+
+        return Global.df.format(result);
     }
 
     @GetMapping(value = "/drawGift")
     @ResponseBody
-    private int drawGift(@RequestParam("userId") int userId, @RequestParam("giftName") String giftName){
-        int result=0;
+    private String drawGift(@RequestParam("userId") int userId, @RequestParam("giftName") String giftName){
+        System.out.println("in gift draw : "+ giftName);
+        List<Ticket> userTickets=ticketRepository.getAllUserTicketWithB(userId, false);
+        if(userTickets.size()==0){
+            return "no tickets!";
+        }
+        Ticket t = userTickets.get(0);
+        double e=3.0;
+        double n=0.5;
+        Pool p = poolRepository.findAll().get(0);
+        int r=p.getRound();
 
-        return result;
+        int result=(int)Global.NormalDistribution(e,n);
+
+        if (result<=0){
+            result=1;
+        }
+
+        System.out.println(giftName);
+        List<Gift> gifts=giftRepository.findAll();
+        for(int i=0;i<gifts.size();i++){
+            if(gifts.get(i).getName().equals(giftName)){
+                Gift g= gifts.get(i);
+                int v=g.getValue();
+                if(result>v){
+                    result=v;
+                }
+                g.setValue(v-result);
+                giftRepository.save(g);
+                giftRepository.flush();
+
+                GiftRecord giftRecord=new GiftRecord();
+                giftRecord.setGiftId(g.getGiftId());
+                giftRecord.setValue(result);
+                giftRecord.setGiftName(giftName);
+                giftRecord.setUserId(userId);
+                giftRecordRepository.save(giftRecord);
+                giftRecordRepository.flush();
+            }
+        }
+
+        p.setRound(r-1);
+        poolRepository.save(p);
+        poolRepository.flush();
+
+        t.setGift(true);
+        t.setUsed(true);
+        t.setValue(result);
+        ticketRepository.save(t);
+        ticketRepository.flush();
+
+        return Integer.toString(result);
     }
 
     @GetMapping(value = "/getGifts")
@@ -98,7 +176,7 @@ public class PoolController {
     private int ExchangeGift(@RequestParam("userId") int userId, @RequestParam("giftName") String giftName){
         List<GiftRecord> records = giftRecordRepository.findAllByUserId(userId);
         for(int i=0;i<records.size();i++){
-            if(records.get(i).getGiftName()==giftName){
+            if(records.get(i).getGiftName().equals(giftName)){
                 int value=records.get(i).getValue();
                 if(giftName.equals("手绘板")){
                     if(value>=10){
@@ -127,7 +205,7 @@ public class PoolController {
     @GetMapping(value = "/getPool")
     @ResponseBody
     private Pool getPool(){
-        Pool pool = poolRepository.findTopByValueIsGreaterThan(0);
+        Pool pool = poolRepository.findAll().get(0);
         if(check(pool)==1){
             pool=init();
         }
@@ -154,11 +232,18 @@ public class PoolController {
     @GetMapping(value = "/init")
     @ResponseBody
     private Pool init(){
-        Pool pool = poolRepository.findTopByValueIsGreaterThan(0);
-            if(pool!=null){
+        Pool pool;
+        if(poolRepository.count()>0){
+            pool = poolRepository.findAll().get(0);
+        }else{
+            pool = new Pool();
+        }
+
+        if(pool!=null){
             Global.message="上一期蛋池剩余："+pool.getValue()+"金";
             poolRepository.delete(pool);
         }
+
         Pool newPool = new Pool();
         Date sd= DateParser.getCurrentDate();
         newPool.setStartDate(DateParser.dateToString(sd));
@@ -167,7 +252,7 @@ public class PoolController {
         newPool.setEndDate(DateParser.dateToString(ed));
 
         newPool.setName("当前奖池");
-        newPool.setRound(48);
+        newPool.setRound(50);
         newPool.setValue(1000);
 
         poolRepository.save(newPool);
