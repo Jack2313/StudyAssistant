@@ -4,9 +4,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 public class DateParser {
     private static DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+
+    //private static DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
     public static Date stringToDate(String s){
         Date res=new Date();
         try {

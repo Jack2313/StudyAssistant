@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface GiftRecordRepository extends JpaRepository<GiftRecord, Integer> {
     public List<GiftRecord> findAllByUserId(int uid);
+
+    public GiftRecord findByGiftIdAndUserId(int gid, int uid);
 }

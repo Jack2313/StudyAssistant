@@ -42,7 +42,7 @@ public class PoolController {
         Gift g1 = new Gift();
         g1.setDescription("d");
         g1.setName("手绘板");
-        g1.setValue(10);
+        g1.setValue(30);
         g1.setWeight(1);
         giftRepository.save(g1);
 
@@ -63,10 +63,24 @@ public class PoolController {
         return giftRepository.findAll();
     }
 
+    @GetMapping(value = "/getUserPoolMoney")
+    @ResponseBody
+    private String getUserPoolMoney(@RequestParam("userId") int userId){
+        double money = 0.0;
+        Pool p=poolRepository.findPoolByOpenIsTrue();
+        List<Ticket> tickets=ticketRepository.getAllUserTicketWithB(userId, true);
+        for(int i=0;i<tickets.size();i++){
+            if(tickets.get(i).isGift()==false) {
+                if(tickets.get(i).getPoolId()==p.getPoolId())
+                    money = money + tickets.get(i).getValue();
+            }
+        }
+        return Global.df.format(money);
+    }
 
     @GetMapping(value = "/draw")
     @ResponseBody
-    private String draw(@RequestParam("userId") int userId){
+    private String draw(@RequestParam("userId") int userId, @RequestParam("poolId") int poolId){
         System.out.println("in draw");
         List<Ticket> userTickets=ticketRepository.getAllUserTicketWithB(userId, false);
         if(userTickets.size()==0){
@@ -74,11 +88,11 @@ public class PoolController {
         }
         Ticket t = userTickets.get(0);
 
-        Pool p = poolRepository.findAll().get(0);
+        Pool p = poolRepository.findPoolByOpenIsTrue();
         int r=p.getRound();
         double v=p.getValue();
         double e=v/r;
-        double n=e/6;
+        double n=e/3;
         double result=Global.NormalDistribution(e,n);
         if (result<=0){
             result=0.01;
@@ -95,6 +109,7 @@ public class PoolController {
         t.setGift(false);
         t.setUsed(true);
         t.setValue(result);
+        t.setPoolId(poolId);
         ticketRepository.save(t);
         ticketRepository.flush();;
 
@@ -111,8 +126,8 @@ public class PoolController {
         }
         Ticket t = userTickets.get(0);
         double e=3.0;
-        double n=0.5;
-        Pool p = poolRepository.findAll().get(0);
+        double n=1;
+        Pool p = poolRepository.findPoolByOpenIsTrue();
         int r=p.getRound();
 
         int result=(int)Global.NormalDistribution(e,n);
@@ -134,11 +149,17 @@ public class PoolController {
                 giftRepository.save(g);
                 giftRepository.flush();
 
-                GiftRecord giftRecord=new GiftRecord();
-                giftRecord.setGiftId(g.getGiftId());
-                giftRecord.setValue(result);
-                giftRecord.setGiftName(giftName);
-                giftRecord.setUserId(userId);
+                GiftRecord giftRecord=giftRecordRepository.findByGiftIdAndUserId(gifts.get(i).getGiftId(), userId);
+                if(giftRecord==null){
+                    giftRecord=new GiftRecord();
+                    giftRecord.setGiftId(g.getGiftId());
+                    giftRecord.setValue(result);
+                    giftRecord.setGiftName(giftName);
+                    giftRecord.setUserId(userId);
+                }else{
+                    giftRecord.setValue(giftRecord.getValue()+result);
+                }
+
                 giftRecordRepository.save(giftRecord);
                 giftRecordRepository.flush();
             }
@@ -205,7 +226,7 @@ public class PoolController {
     @GetMapping(value = "/getPool")
     @ResponseBody
     private Pool getPool(){
-        Pool pool = poolRepository.findAll().get(0);
+        Pool pool = poolRepository.findPoolByOpenIsTrue();
         if(check(pool)==1){
             pool=init();
         }
@@ -233,15 +254,13 @@ public class PoolController {
     @ResponseBody
     private Pool init(){
         Pool pool;
-        if(poolRepository.count()>0){
-            pool = poolRepository.findAll().get(0);
-        }else{
-            pool = new Pool();
-        }
+        pool = poolRepository.findPoolByOpenIsTrue();
 
         if(pool!=null){
             Global.message="上一期蛋池剩余："+pool.getValue()+"金";
-            poolRepository.delete(pool);
+            //poolRepository.delete(pool);
+            pool.setOpen(false);
+            poolRepository.save(pool);
         }
 
         Pool newPool = new Pool();
@@ -252,8 +271,9 @@ public class PoolController {
         newPool.setEndDate(DateParser.dateToString(ed));
 
         newPool.setName("当前奖池");
-        newPool.setRound(50);
+        newPool.setRound(56);
         newPool.setValue(1000);
+        newPool.setOpen(true);
 
         poolRepository.save(newPool);
         return newPool;

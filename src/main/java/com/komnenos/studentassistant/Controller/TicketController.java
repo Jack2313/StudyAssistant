@@ -41,4 +41,5 @@ public class TicketController {
         }
         return Global.df.format(money);
     }
+
 }

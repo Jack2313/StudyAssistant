@@ -18,6 +18,16 @@ public class Ticket {
 
     private boolean isUsed;
 
+    public int getPoolId() {
+        return poolId;
+    }
+
+    public void setPoolId(int poolId) {
+        this.poolId = poolId;
+    }
+
+    private int poolId;
+
     public boolean isAble() {
         return isAble;
     }

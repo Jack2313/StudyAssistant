@@ -23,6 +23,16 @@ public class Pool {
 
     private String endDate;
 
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    public void setOpen(boolean open) {
+        isOpen = open;
+    }
+
+    private boolean isOpen;
+
     public String getStartDate() {
         return startDate;
     }

@@ -7,10 +7,14 @@ import com.komnenos.studentassistant.Repository.CalendarRepository;
 import com.komnenos.studentassistant.Repository.TicketRepository;
 import com.komnenos.studentassistant.StaticClass.DateParser;
 import com.komnenos.studentassistant.StaticClass.Global;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +35,7 @@ public class CalendarController {
             t.setUsed(false);
             t.setAble(true);
             t.setGift(false);
+            t.setPoolId(0);
             t.setValue(0.0);
             t.setUserId(userId);
             ticketRepository.save(t);
@@ -111,4 +116,55 @@ public class CalendarController {
         return 1;
     }
 
+
+    @GetMapping(value="/setBondUser")
+    @ResponseBody
+    public int setBondUser(){
+        Global.bondUser.put(4,5);
+        Global.bondUser.put(5,4);
+        return 1;
+    }
+
+    @GetMapping(value = "/getDayCalendar")
+    @ResponseBody
+    public List<Calendar> getDayCalendar(@RequestParam("userId") int userId, @RequestParam("date") String date){
+        if(Global.bondUser.size()==0){
+            setBondUser();
+        }
+        List<Calendar> calendars1 = calendarRepository.getAllCalendar(userId);
+        List<Calendar> calendars2 = calendarRepository.getAllCalendar(Global.bondUser.get(userId));
+        Date today=DateParser.stringToDate(date);
+        Date eve=new Date();
+        eve.setDate(today.getDate());
+        eve.setYear(today.getYear());
+        eve.setMonth(today.getMonth());
+        eve.setSeconds(0);
+        eve.setMinutes(0);
+        eve.setHours(0);
+        Date nextEve=new Date();
+        nextEve.setTime(eve.getTime());
+        nextEve.setHours(23);
+        nextEve.setMinutes(59);
+        nextEve.setSeconds(59);
+        //System.out.println(eve.toString());
+        //System.out.println(nextEve.toString());
+        //System.out.println(DateParser.stringToDate("2020-03-28 08:03:21").toString());
+        List<Calendar> results=new ArrayList<>();
+        for(int i=0;i<calendars1.size();i++){
+            if(nextEve.after(DateParser.stringToDate(calendars1.get(i).getStartTime()))){
+                if(eve.before(DateParser.stringToDate(calendars1.get(i).getStartTime()))){
+                    results.add(calendars1.get(i));
+                }
+            }
+        }
+        for(int i=0;i<calendars2.size();i++){
+            if(nextEve.after(DateParser.stringToDate(calendars2.get(i).getStartTime()))){
+                if(eve.before(DateParser.stringToDate(calendars2.get(i).getStartTime()))){
+                    results.add(calendars2.get(i));
+                }
+            }
+        }
+        Collections.sort(results, (Calendar b1, Calendar b2)->b1.getStartTime().compareTo(b2.getStartTime()));
+        return results;
+    }
 }

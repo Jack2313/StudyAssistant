@@ -59,4 +59,5 @@ public class UserController {
         User u =userRepository.findByUserId(userId);
         return u.getPermission();
     }
+
 }
