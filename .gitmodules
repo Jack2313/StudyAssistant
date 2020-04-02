@@ -1,0 +1,3 @@
+[submodule "poj"]
+	path = poj
+	url = git@github.com:Jack2313/poj.git
