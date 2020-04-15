@@ -42,4 +42,35 @@ public class TicketController {
         return Global.df.format(money);
     }
 
+    @GetMapping(value = "/bonusTicket")
+    @ResponseBody
+    private String createTicket(@RequestParam("userId") int userId){
+        Ticket t = new Ticket();
+        t.setTicketCode(Global.getRandomString(16));
+        t.setUsed(false);
+        t.setAble(false);
+        t.setGift(false);
+        t.setPoolId(0);
+        t.setValue(0.0);
+        t.setUserId(userId);
+        ticketRepository.save(t);
+        ticketRepository.flush();
+
+        return t.getTicketCode();
+    }
+
+    @GetMapping(value = "/exchangeTicket")
+    @ResponseBody
+    private int exchangeTicket(@RequestParam("userId") int userId, @RequestParam("code") String code){
+        List<Ticket> tickets=ticketRepository.getAllUnableTicket(userId);
+        for(int i=0;i<tickets.size();i++){
+            if(tickets.get(i).getTicketCode().equals(code)){
+                tickets.get(i).setAble(true);
+                ticketRepository.save(tickets.get(i));
+                ticketRepository.flush();
+                break;
+            }
+        }
+        return 1;
+    }
 }
